@@ -46,3 +46,7 @@ claude plugin test .
 ```
 
 The mod keeps its values in the session's `$.state`. `hooks/meter.ts` holds the pure helpers, `hooks/register.tsx` the hooks.
+
+## License
+
+[MIT](LICENSE)

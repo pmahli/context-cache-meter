@@ -1,6 +1,6 @@
 {
-  "name": "ahlers-mods",
-  "description": "Mods für Claude Code von ahlers.at",
-  "owner": { "name": "ahlers.at" },
+  "name": "pmahli-mods",
+  "description": "Mods for Claude Code by pmahli",
+  "owner": { "name": "pmahli" },
   "plugins": [{ "name": "context-cache-meter", "source": "./" }]
 }
