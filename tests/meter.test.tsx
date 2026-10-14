@@ -266,18 +266,18 @@ describe('auto-compact mark', () => {
     // 40 % of the window, but 80 % of the way to auto-compaction.
     await $.session.measure(tokens(400_000))
     expect(toasts).toHaveLength(1)
-    expect(toasts[0]).toContain('80 % to Auto-Compact')
+    expect(toasts[0]).toContain('80 % of auto-compact')
     expect(toasts[0]).toContain('/compact soon')
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /80 % to Auto-Compact/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /80 % of auto-compact/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /400k\/500k/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /plan \/compact soon/ })).toBeDefined()
     await ui.unmount()
 
     await $.session.measure(tokens(460_000))
     expect(toasts).toHaveLength(2)
-    expect(toasts[1]).toContain('92 % to Auto-Compact')
+    expect(toasts[1]).toContain('92 % of auto-compact')
     expect(toasts[1]).toContain('run /compact now')
   })
 
@@ -290,7 +290,7 @@ describe('auto-compact mark', () => {
 
     await $.session.measure(tokens(710_000))
     expect(toasts).toHaveLength(1)
-    expect(toasts[0]).not.toContain('Auto-Compact')
+    expect(toasts[0]).not.toContain('auto-compact')
   })
 })
 

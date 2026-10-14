@@ -62,7 +62,7 @@ async function takeFill($: EngineInterface, reading: ContextFill) {
 
   if (level > announced) {
     const percent = Math.round(gauge ?? 0)
-    const reference = fill.compactAt === undefined ? '' : ' to Auto-Compact'
+    const reference = fill.compactAt === undefined ? '' : ' of auto-compact'
     if (level === 90) {
       $.ui.toast(`Context at ${percent} %${reference} – run /compact now`, {
         timeoutMs: 10_000,
@@ -245,7 +245,7 @@ export const register: Register = (on, options) => {
             start.gapMs === null ? '' : ` (after ${formatDuration(start.gapMs, 'floor')} pause)`
           }`
 
-    const reference = compactAt === undefined ? '' : ' to Auto-Compact'
+    const reference = compactAt === undefined ? '' : ' of auto-compact'
     const hint =
       level === 90
         ? `▲ Context at ${Math.round(percent ?? 0)} %${reference} – run /compact now (or /clear when switching topics).`

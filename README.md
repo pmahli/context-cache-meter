@@ -3,7 +3,7 @@
 A [Claude Code](https://claude.com/claude-code) mod that draws a band above the prompt: how full the context is, whether the prompt cache is warm or cold, and when to `/compact`.
 
 ```
-Context ██████░░░░ 61 % to Auto-Compact (102k/167k)  ·  Cache ● warm, 41 min left  ·  Turn start 99 % from cache
+Context ██████░░░░ 61 % of auto-compact (102k/167k)  ·  Cache ● warm, 41 min left  ·  Turn start 99 % from cache
 ```
 
 ## What it shows
