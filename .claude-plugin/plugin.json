@@ -1,0 +1,15 @@
+{
+  "name": "context-cache-meter",
+  "version": "0.1.0",
+  "author": { "name": "ahlers.at" },
+  "description": "Band über dem Prompt: Kontext-Füllstand, Prompt-Cache warm/kalt mit Restzeit, Hinweise zum /compact bei 70 % und 90 %.",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "cacheTtlMinutes": {
+      "type": "number",
+      "title": "Cache-Lebensdauer (Minuten)",
+      "description": "Wie lange der Prompt-Cache nach der letzten Antwort warm bleibt: 5 (Standard der API) oder 60 (1-Stunden-Cache).",
+      "default": 60
+    }
+  }
+}

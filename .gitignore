@@ -1,0 +1,3 @@
+# Written by the engine each time it loads the mod (API typings, tsconfig).
+.claude-plugin/types/
+tsconfig.json

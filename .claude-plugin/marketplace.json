@@ -1,0 +1,6 @@
+{
+  "name": "ahlers-mods",
+  "description": "Mods für Claude Code von ahlers.at",
+  "owner": { "name": "ahlers.at" },
+  "plugins": [{ "name": "context-cache-meter", "source": "./" }]
+}
