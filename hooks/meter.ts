@@ -38,11 +38,11 @@ export const formatTokens = (tokens: number): string => {
 
 export const formatDuration = (ms: number, round: 'floor' | 'ceil'): string => {
   const minutes = Math[round](ms / 60_000)
-  if (minutes < 1) return '<1 Min'
-  if (minutes < 60) return `${minutes} Min`
+  if (minutes < 1) return '<1 min'
+  if (minutes < 60) return `${minutes} min`
   const hours = Math.floor(minutes / 60)
   const rest = minutes % 60
-  return rest === 0 ? `${hours} Std` : `${hours} Std ${rest} Min`
+  return rest === 0 ? `${hours} hr` : `${hours} hr ${rest} min`
 }
 
 export type CacheState = 'cold' | 'warm' | 'expiring'

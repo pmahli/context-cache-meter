@@ -137,9 +137,9 @@ describe('helpers', () => {
     expect(formatTokens(620_400)).toBe('620k')
     expect(formatTokens(1_000_000)).toBe('1M')
     expect(formatTokens(1_500_000)).toBe('1,5M')
-    expect(formatDuration(30_000, 'ceil')).toBe('1 Min')
-    expect(formatDuration(30_000, 'floor')).toBe('<1 Min')
-    expect(formatDuration(90 * MIN, 'floor')).toBe('1 Std 30 Min')
+    expect(formatDuration(30_000, 'ceil')).toBe('1 min')
+    expect(formatDuration(30_000, 'floor')).toBe('<1 min')
+    expect(formatDuration(90 * MIN, 'floor')).toBe('1 hr 30 min')
   })
 
   test('cache is warm, expiring, then cold; no response means cold', () => {
@@ -162,14 +162,14 @@ describe('thresholds', () => {
 
     await $.session.measure(fill(71))
     expect(toasts).toHaveLength(1)
-    expect(toasts[0]).toContain('/compact bald')
+    expect(toasts[0]).toContain('/compact soon')
 
     await $.session.measure(fill(80))
     expect(toasts).toHaveLength(1)
 
     await $.session.measure(fill(91))
     expect(toasts).toHaveLength(2)
-    expect(toasts[1]).toContain('jetzt /compact')
+    expect(toasts[1]).toContain('run /compact now')
 
     await $.session.measure(fill(undefined))
     await $.session.measure(fill(72))
@@ -187,13 +187,13 @@ describe('band', () => {
 
     const ui = await $.ui.mount(BAND)
     expect(await ui.find({ type: 'Text', text: /62 %/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /warm, noch 1 Std/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /Zugstart 99 % aus Cache/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /warm, 1 hr left/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Turn start 99 % from cache/ })).toBeDefined()
 
     await clock.advance(61 * MIN)
     await ui.redraw()
-    expect(await ui.find({ type: 'Text', text: /kalt/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /~620k neu/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /cold/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /~620k rewritten/ })).toBeDefined()
     await ui.unmount()
   })
 
@@ -203,12 +203,12 @@ describe('band', () => {
 
     await $.session.measure(fill(75))
     const warn = await $.ui.mount(BAND)
-    expect(await warn.find({ type: 'Text', text: /bald einplanen/ })).toBeDefined()
+    expect(await warn.find({ type: 'Text', text: /plan \/compact soon/ })).toBeDefined()
     await warn.unmount()
 
     await $.session.measure(fill(93))
     const critical = await $.ui.mount(BAND)
-    expect(await critical.find({ type: 'Text', text: /jetzt \/compact ausführen/ })).toBeDefined()
+    expect(await critical.find({ type: 'Text', text: /run \/compact now/ })).toBeDefined()
     await critical.unmount()
   })
 
@@ -218,7 +218,7 @@ describe('band', () => {
     await $.session.measure(fill(80))
 
     const ui = await $.ui.mount({ ...BAND, props: { ...BAND.props, hasSurvey: true } })
-    expect(await ui.find({ type: 'Text', text: /Kontext/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /Context/ })).toBeUndefined()
     await ui.unmount()
   })
 })
@@ -230,15 +230,15 @@ describe('cache lifetime option', () => {
     await step($)
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /warm, noch 5 Min/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /warm, 5 min left/ })).toBeDefined()
 
     await clock.advance(4.5 * MIN)
     await ui.redraw()
-    expect(await ui.find({ type: 'Text', text: /warm, noch 1 Min/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /warm, 1 min left/ })).toBeDefined()
 
     await clock.advance(3 * MIN)
     await ui.redraw()
-    expect(await ui.find({ type: 'Text', text: /kalt \(seit 2 Min\)/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /cold \(since 2 min\)/ })).toBeDefined()
     await ui.unmount()
   })
 })
@@ -266,19 +266,19 @@ describe('auto-compact mark', () => {
     // 40 % of the window, but 80 % of the way to auto-compaction.
     await $.session.measure(tokens(400_000))
     expect(toasts).toHaveLength(1)
-    expect(toasts[0]).toContain('80 % bis Auto-Compact')
-    expect(toasts[0]).toContain('/compact bald')
+    expect(toasts[0]).toContain('80 % to Auto-Compact')
+    expect(toasts[0]).toContain('/compact soon')
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /80 % bis Auto-Compact/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /80 % to Auto-Compact/ })).toBeDefined()
     expect(await ui.find({ type: 'Text', text: /400k\/500k/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /bald einplanen/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /plan \/compact soon/ })).toBeDefined()
     await ui.unmount()
 
     await $.session.measure(tokens(460_000))
     expect(toasts).toHaveLength(2)
-    expect(toasts[1]).toContain('92 % bis Auto-Compact')
-    expect(toasts[1]).toContain('jetzt /compact')
+    expect(toasts[1]).toContain('92 % to Auto-Compact')
+    expect(toasts[1]).toContain('run /compact now')
   })
 
   test('without a readable mark the window is the reference', async ($, on) => {
@@ -322,12 +322,12 @@ describe('cache per request', () => {
     await step($)
 
     expect(toasts).toHaveLength(1)
-    expect(toasts[0]).toContain('nach 12 Min schon kalt')
+    expect(toasts[0]).toContain('Cache cold after 12 min')
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /Kalter Cache im letzten Zug/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /80k Tokens neu geschrieben, nach 12 Min Pause/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /Schon nach 12 Min kalt/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Cold cache in last turn/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /80k tokens rewritten, after 12 min pause/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Already cold after 12 min/ })).toBeDefined()
 
     await clock.advance(12 * MIN)
     await step($)
@@ -346,8 +346,8 @@ describe('cache per request', () => {
 
     expect(toasts).toHaveLength(0)
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /Kalter Cache im letzten Zug/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /Schon nach/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /Cold cache in last turn/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Already cold after/ })).toBeUndefined()
     await ui.unmount()
   })
 
@@ -359,8 +359,8 @@ describe('cache per request', () => {
 
     expect(toasts).toHaveLength(0)
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /Kalter Cache im letzten Zug/ })).toBeUndefined()
-    expect(await ui.find({ type: 'Text', text: /Zugstart 0 % aus Cache/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Cold cache in last turn/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /Turn start 0 % from cache/ })).toBeDefined()
     await ui.unmount()
   })
 
@@ -376,13 +376,13 @@ describe('cache per request', () => {
     await step($, 1)
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /Zugstart 0 % aus Cache \(nach 12 Min Pause\)/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /Kalter Cache im letzten Zug/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Turn start 0 % from cache \(after 12 min pause\)/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Cold cache in last turn/ })).toBeDefined()
 
     // The next turn starts warm: the note goes.
     await step($, 0)
     await ui.redraw()
-    expect(await ui.find({ type: 'Text', text: /Kalter Cache im letzten Zug/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /Cold cache in last turn/ })).toBeUndefined()
     await ui.unmount()
   })
 
@@ -395,8 +395,8 @@ describe('cache per request', () => {
     await step($)
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /○ kalt/ })).toBeDefined()
-    expect(await ui.find({ type: 'Text', text: /Zugstart/ })).toBeUndefined()
+    expect(await ui.find({ type: 'Text', text: /○ cold/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /Turn start/ })).toBeUndefined()
     await ui.unmount()
   })
 
@@ -407,7 +407,7 @@ describe('cache per request', () => {
 
     await clock.advance(50 * MIN)
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Text', text: /warm, noch 10 Min ⚠/ })).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /warm, 10 min left ⚠/ })).toBeDefined()
     await ui.unmount()
   })
 })
@@ -438,12 +438,12 @@ describe('compact button', () => {
     await $.session.measure(fill(93))
 
     const ui = await $.ui.mount(BAND)
-    expect(await ui.find({ type: 'Button', text: /Jetzt kompaktieren/ })).toBeDefined()
+    expect(await ui.find({ type: 'Button', text: /Compact now/ })).toBeDefined()
 
     await ui.press({ key: 'compact' })
     expect(compactions).toBe(0)
     await ui.redraw()
-    expect(await ui.find({ type: 'Button', text: /Nochmal drücken/ })).toBeDefined()
+    expect(await ui.find({ type: 'Button', text: /Press again/ })).toBeDefined()
 
     await ui.press({ key: 'compact' })
     expect(compactions).toBe(1)
@@ -460,7 +460,7 @@ describe('compact button', () => {
 
     await clock.advance(9_000)
     await ui.redraw()
-    expect(await ui.find({ type: 'Button', text: /Jetzt kompaktieren/ })).toBeDefined()
+    expect(await ui.find({ type: 'Button', text: /Compact now/ })).toBeDefined()
 
     await ui.press({ key: 'compact' })
     expect(compactions).toBe(0)

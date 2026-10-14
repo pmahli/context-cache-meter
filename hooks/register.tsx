@@ -62,13 +62,13 @@ async function takeFill($: EngineInterface, reading: ContextFill) {
 
   if (level > announced) {
     const percent = Math.round(gauge ?? 0)
-    const reference = fill.compactAt === undefined ? '' : ' bis Auto-Compact'
+    const reference = fill.compactAt === undefined ? '' : ' to Auto-Compact'
     if (level === 90) {
-      $.ui.toast(`Kontext bei ${percent} %${reference} – jetzt /compact ausführen`, {
+      $.ui.toast(`Context at ${percent} %${reference} – run /compact now`, {
         timeoutMs: 10_000,
       })
     } else {
-      $.ui.toast(`Kontext bei ${percent} %${reference} – /compact bald einplanen`, {
+      $.ui.toast(`Context at ${percent} %${reference} – plan /compact soon`, {
         timeoutMs: 8_000,
       })
     }
@@ -110,7 +110,7 @@ async function recordStep(
   if (suspectsShortTtl(entry, ttlMs) && !(await read($, ttlWarned))) {
     await update($, ttlWarned, () => true)
     $.ui.toast(
-      `Cache nach ${formatDuration(entry.gapMs ?? 0, 'floor')} schon kalt – evtl. gilt nur 5 Min (Einstellung cacheTtlMinutes)`,
+      `Cache cold after ${formatDuration(entry.gapMs ?? 0, 'floor')} – possibly only 5 min lifetime (setting cacheTtlMinutes)`,
       { timeoutMs: 12_000 },
     )
   }
@@ -135,10 +135,10 @@ async function pressCompact($: EngineInterface) {
   try {
     const result = await $.session.compact()
     if ('skip' in result) {
-      $.ui.toast(`Kompaktieren übersprungen: ${result.skip}`, { timeoutMs: 8_000 })
+      $.ui.toast(`Compaction skipped: ${result.skip}`, { timeoutMs: 8_000 })
     }
   } catch {
-    $.ui.toast('Kompaktieren fehlgeschlagen', { timeoutMs: 8_000 })
+    $.ui.toast('Compaction failed', { timeoutMs: 8_000 })
   } finally {
     await update($, isCompacting, () => false)
   }
@@ -229,42 +229,42 @@ export const register: Register = (on, options) => {
           : 'suggestion'
 
     const rewrite =
-      fill?.tokens === undefined ? '' : `, ~${formatTokens(fill.tokens)} neu`
+      fill?.tokens === undefined ? '' : `, ~${formatTokens(fill.tokens)} rewritten`
     const cacheLabel = e.props.isWorking
-      ? '● aktiv'
+      ? '● active'
       : cache.state === 'cold'
         ? last === null
-          ? `○ kalt${rewrite}`
-          : `○ kalt (seit ${formatDuration(cache.idleMs - ttlMs, 'floor')})${rewrite}`
-        : `● warm, noch ${formatDuration(cache.remainingMs, 'ceil')}${cache.state === 'expiring' ? ' ⚠' : ''}`
+          ? `○ cold${rewrite}`
+          : `○ cold (since ${formatDuration(cache.idleMs - ttlMs, 'floor')})${rewrite}`
+        : `● warm, ${formatDuration(cache.remainingMs, 'ceil')} left${cache.state === 'expiring' ? ' ⚠' : ''}`
 
     const startNote =
       start === null
         ? null
-        : `Zugstart ${cacheRatio(start)} % aus Cache${
-            start.gapMs === null ? '' : ` (nach ${formatDuration(start.gapMs, 'floor')} Pause)`
+        : `Turn start ${cacheRatio(start)} % from cache${
+            start.gapMs === null ? '' : ` (after ${formatDuration(start.gapMs, 'floor')} pause)`
           }`
 
-    const reference = compactAt === undefined ? '' : ' bis Auto-Compact'
+    const reference = compactAt === undefined ? '' : ' to Auto-Compact'
     const hint =
       level === 90
-        ? `▲ Kontext bei ${Math.round(percent ?? 0)} %${reference} – jetzt /compact ausführen (oder /clear bei Themenwechsel).`
+        ? `▲ Context at ${Math.round(percent ?? 0)} %${reference} – run /compact now (or /clear when switching topics).`
         : level === 70
-          ? `▲ Kontext bei ${Math.round(percent ?? 0)} %${reference} – /compact bald einplanen, am besten an einem Aufgabenende.`
+          ? `▲ Context at ${Math.round(percent ?? 0)} %${reference} – plan /compact soon, ideally at a task boundary.`
           : null
 
     const coldNote =
       cold === null
         ? null
-        : `○ Kalter Cache im letzten Zug${cold.index > 0 ? ` (ab Schritt ${cold.index + 1})` : ''}: ~${formatTokens(cold.created)} Tokens neu geschrieben${
-            cold.gapMs === null ? '' : `, nach ${formatDuration(cold.gapMs, 'floor')} Pause`
+        : `○ Cold cache in last turn${cold.index > 0 ? ` (from step ${cold.index + 1})` : ''}: ~${formatTokens(cold.created)} tokens rewritten${
+            cold.gapMs === null ? '' : `, after ${formatDuration(cold.gapMs, 'floor')} pause`
           }.`
     const isTtlSuspected = cold !== null && suspectsShortTtl(cold, ttlMs)
 
     return (
       <Box flexDirection="column">
         <Text>
-          <Text bold>Kontext </Text>
+          <Text bold>Context </Text>
           {percent === undefined ? (
             <Text dimColor>–</Text>
           ) : (
@@ -288,12 +288,12 @@ export const register: Register = (on, options) => {
             {hint}
           </Text>
         )}
-        {level === 90 && compacting && <Text dimColor>kompaktiere …</Text>}
+        {level === 90 && compacting && <Text dimColor>compacting …</Text>}
         {level === 90 && !compacting && !e.props.isWorking && (
           <Box>
             <Button
               key="compact"
-              label={armed ? 'Sicher? Nochmal drücken zum Kompaktieren' : 'Jetzt kompaktieren'}
+              label={armed ? 'Sure? Press again to compact' : 'Compact now'}
               onPress={() => pressCompact($)}
             />
           </Box>
@@ -304,8 +304,8 @@ export const register: Register = (on, options) => {
             {isTtlSuspected && (
               <Text color="warning">
                 {' '}
-                Schon nach {formatDuration(cold?.gapMs ?? 0, 'floor')} kalt – evtl. gilt nur 5 Min
-                Lebensdauer (Einstellung cacheTtlMinutes).
+                Already cold after {formatDuration(cold?.gapMs ?? 0, 'floor')} – possibly only 5 min
+                lifetime (setting cacheTtlMinutes).
               </Text>
             )}
           </Text>

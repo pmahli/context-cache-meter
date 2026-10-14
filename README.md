@@ -3,18 +3,16 @@
 A [Claude Code](https://claude.com/claude-code) mod that draws a band above the prompt: how full the context is, whether the prompt cache is warm or cold, and when to `/compact`.
 
 ```
-Kontext ██████░░░░ 61 % bis Auto-Compact (102k/167k)  ·  Cache ● warm, noch 41 Min  ·  Zugstart 99 % aus Cache
+Context ██████░░░░ 61 % to Auto-Compact (102k/167k)  ·  Cache ● warm, 41 min left  ·  Turn start 99 % from cache
 ```
-
-> **Language:** the texts in the band and in the toasts are currently German. Everything else (code, docs) is English. A language option is a small change if there is interest.
 
 ## What it shows
 
 - **Context**: tokens against the auto-compact mark, so the bar tells you how far you are from the automatic compaction, not from the hard limit. If auto-compact is off or the mark cannot be read, it falls back to the model's context window.
 - **Cache**:
-  - `● warm, noch X Min`, with `⚠` in the last fifth of the lifetime
-  - `● aktiv` while a turn is running
-  - `○ kalt (seit X Min), ~Xk neu` once it has lapsed, with the amount the next answer has to write again
+  - `● warm, X min left`, with `⚠` in the last fifth of the lifetime
+  - `● active` while a turn is running
+  - `○ cold (since X min), ~Xk rewritten` once it has lapsed, with the amount the next answer has to write again
 
   The remaining time is calculated (last response + lifetime). The API does not report it.
 - **Turn start** (from 115 columns): the share of input tokens the cache served on the first request of a turn, with the pause before it. It is measured per request, not summed over the turn, so a cold start is not hidden by the cache hits that follow it.
